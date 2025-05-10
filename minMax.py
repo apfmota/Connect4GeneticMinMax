@@ -1,21 +1,24 @@
 # não sei se esse código realmente vai ser utilizado,
 # escrevi pra ver se eu entendi a lógica do minMax
+import copy
 
 class State:
-    def __init__(self, board, player, lastMove=None):
-        self.board = board
-        self.player = player
+    def __init__(self, board, lastPlayer, lastMove=None):
+        self.board = copy.deepcopy(board)
+        self.lastPlayer = lastPlayer
+        self.currentPlayer = 2 if lastPlayer == 1 else 1
         self.lastMove = lastMove
     
     def getNextStates(self, state):
-        possivleStates = []
-        for i in range(4, -1, -1):
-            for j in range(5):
+        possibleStates = []
+        for j in range(5):
+            for i in range(4, -1, -1):
                 if state.board[i][j] == 0:
-                    newState = State(state.board, 1 if state.player == 2 else 2, lastMove=(i, j))
-                    newState.board[i][j] = state.player
-                    possivleStates.append(newState)
-        return possivleStates
+                    newState = State(state.board, state.currentPlayer, lastMove=(i, j))
+                    newState.board[i][j] = state.currentPlayer
+                    possibleStates.append(newState)
+                    break
+        return possibleStates
 
 def getInitialState():
     return State([
@@ -24,7 +27,7 @@ def getInitialState():
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
-    ], 1)    
+    ], 2)    
 
 def minMax(state: State, depth, alfa, beta):
     terminal, winner = isTerminal(state)
@@ -34,26 +37,27 @@ def minMax(state: State, depth, alfa, beta):
                 return float('inf')
             elif winner == 2:
                 return float('-inf')
+            else:
+                return 0
         else:
-            #if not terminal:
-            #    return evaluate(state) --- Falta implementar a funcao de avaliacao
+            #return evaluate(state) --- Falta implementar a funcao de avaliacao
             return 0
     possibleStates = state.getNextStates(state)
 
-    if state.player == 1:
+    if state.currentPlayer == 1:
         bestValue = float('-inf')
-        for state in possibleStates:
-            bestValue = minMax(state, depth - 1, alfa, beta)
+        for possibleState in possibleStates:
+            bestValue = max(bestValue, minMax(possibleState, depth - 1, alfa, beta))
             alfa = max(alfa, bestValue)
             if beta <= alfa:
                 break
         return bestValue
     else:
         bestValue = float('inf')
-        for state in possibleStates:
-            bestValue = minMax(state, depth - 1, alfa, beta)
+        for possibleState in possibleStates:
+            bestValue = min(bestValue, minMax(possibleState, depth - 1, alfa, beta))
             beta = min(beta, bestValue)
-            if beta >= alfa:
+            if beta <= alfa:
                 break
         return bestValue
         
@@ -64,20 +68,20 @@ def isTerminal(state):
     line = state.lastMove[0]
     sequentialPieces = 0
     for i in range(5):
-        if state.board[line][i] == state.player:
+        if state.board[line][i] == state.lastPlayer:
             sequentialPieces += 1
             if (sequentialPieces == 4):
-                return True, state.player
+                return True, state.lastPlayer
         else:
             sequentialPieces = 0
     #checa 4 na coluna:
     column = state.lastMove[1]
     sequentialPieces = 0
     for i in range(5):
-        if state.board[i][column] == state.player:
+        if state.board[i][column] == state.lastPlayer:
             sequentialPieces += 1
             if (sequentialPieces == 4):
-                return True, state.player
+                return True, state.lastPlayer
         else:
             sequentialPieces = 0
 
@@ -90,10 +94,10 @@ def isTerminal(state):
         startCol -= 1
 
     while startRow < 5 and startCol < 5:
-        if state.board[startRow][startCol] == state.player:
+        if state.board[startRow][startCol] == state.lastPlayer:
             sequentialPieces += 1
             if sequentialPieces == 4:
-                return True, state.player
+                return True, state.lastPlayer
         else:
             sequentialPieces = 0
         startRow += 1
@@ -107,10 +111,10 @@ def isTerminal(state):
         startCol += 1
 
     while startRow < 5 and startCol >= 0:
-        if state.board[startRow][startCol] == state.player:
+        if state.board[startRow][startCol] == state.lastPlayer:
             sequentialPieces += 1
             if sequentialPieces == 4:
-                return True, state.player
+                return True, state.lastPlayer
         else:
             sequentialPieces = 0
         startRow += 1
@@ -122,4 +126,5 @@ def evaluate(state):
     # calcula a funcao de avaliacao (pesos e etc)
     pass
 
+# testando o minMax
 print(minMax(getInitialState(), 10, float('-inf'), float('inf')))
