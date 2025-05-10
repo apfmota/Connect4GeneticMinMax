@@ -29,7 +29,7 @@ def getInitialState():
         [0, 0, 0, 0, 0],
     ], 2)    
 
-def minMax(state: State, depth, alfa, beta):
+def minMax(state: State, depth, alfa, beta, weights):
     terminal, winner = isTerminal(state)
     if terminal or depth == 0:
         if terminal:
@@ -40,8 +40,8 @@ def minMax(state: State, depth, alfa, beta):
             else:
                 return 0
         else:
-            #return evaluate(state) --- Falta implementar a funcao de avaliacao
-            return 0
+            return evaluate(state, weights)
+        
     possibleStates = state.getNextStates(state)
 
     if state.currentPlayer == 1:
@@ -122,9 +122,17 @@ def isTerminal(state):
 
     return False, 0
 
-def evaluate(state):
-    # calcula a funcao de avaliacao (pesos e etc)
+def evaluate(state, weights):
+    eval = 0
+
+    metrics = get_metrics(state)
+    for i in range(len(metrics)):
+        eval += metrics[i] * weights[i]
+
+    return eval
+
+def get_metrics(state):
     pass
 
 # testando o minMax
-print(minMax(getInitialState(), 10, float('-inf'), float('inf')))
+# print(minMax(getInitialState(), 10, float('-inf'), float('inf')))
