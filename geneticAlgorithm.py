@@ -1,6 +1,7 @@
 import random
 
 import minMax
+import game
 
 POPULATION_SIZE = 10
 GENE_COUNT = 3
@@ -22,8 +23,8 @@ def create_population():
     return population
 
 def match(chromosome1, chromosome2):
-    # Retorna vencedor
-    pass
+    game = game.Game(chromosome1, chromosome2, 10)
+    return game.play() #retorna 1 se o jogador 1 vencer, 2 se o jogador 2 vencer e 0 se empatar
 
 def tournament():
     pass

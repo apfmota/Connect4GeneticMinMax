@@ -3,22 +3,32 @@
 import copy
 
 class State:
-    def __init__(self, board, lastPlayer, lastMove=None):
+    def __init__(self, board, currentPlayer, lastMove=None):
         self.board = copy.deepcopy(board)
-        self.lastPlayer = lastPlayer
-        self.currentPlayer = 2 if lastPlayer == 1 else 1
+        self.lastPlayer = 1 if currentPlayer == 2 else 2 
+        self.currentPlayer = currentPlayer
         self.lastMove = lastMove
+        self.moveCount = 0
     
-    def getNextStates(self, state):
+    def getNextStates(self):
         possibleStates = []
         for j in range(5):
             for i in range(4, -1, -1):
-                if state.board[i][j] == 0:
-                    newState = State(state.board, state.currentPlayer, lastMove=(i, j))
-                    newState.board[i][j] = state.currentPlayer
+                if self.board[i][j] == 0:
+                    newState = self.makeMove((i, j))
                     possibleStates.append(newState)
                     break
         return possibleStates
+    
+    def makeMove(self, move):
+        newState = State(self.board, self.lastPlayer, lastMove=move)
+        newState.board[move[0]][move[1]] = self.currentPlayer
+        newState.moveCount = self.moveCount + 1
+        return newState
+    
+    def printBoard(self):
+        for line in self.board:
+            print(' '.join(map(str, line)))
 
 def getInitialState():
     return State([
@@ -27,7 +37,7 @@ def getInitialState():
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
-    ], 2)    
+    ], 1)    
 
 def minMax(state: State, depth, alfa, beta, weights):
     terminal, winner = isTerminal(state)
@@ -40,14 +50,15 @@ def minMax(state: State, depth, alfa, beta, weights):
             else:
                 return 0
         else:
-            return evaluate(state, weights)
+            return 0
+            #return evaluate(state, weights)
         
-    possibleStates = state.getNextStates(state)
+    possibleStates = state.getNextStates()
 
     if state.currentPlayer == 1:
         bestValue = float('-inf')
         for possibleState in possibleStates:
-            bestValue = max(bestValue, minMax(possibleState, depth - 1, alfa, beta))
+            bestValue = max(bestValue, minMax(possibleState, depth - 1, alfa, beta, weights))
             alfa = max(alfa, bestValue)
             if beta <= alfa:
                 break
@@ -55,13 +66,16 @@ def minMax(state: State, depth, alfa, beta, weights):
     else:
         bestValue = float('inf')
         for possibleState in possibleStates:
-            bestValue = min(bestValue, minMax(possibleState, depth - 1, alfa, beta))
+            bestValue = min(bestValue, minMax(possibleState, depth - 1, alfa, beta, weights))
             beta = min(beta, bestValue)
             if beta <= alfa:
                 break
         return bestValue
         
 def isTerminal(state):
+    #tabuleiro cheio:
+    if state.moveCount == 25:
+        return True, 0
     #checa 4 na linha:
     if (state.lastMove == None):
         return False, 0
@@ -119,7 +133,7 @@ def isTerminal(state):
             sequentialPieces = 0
         startRow += 1
         startCol -= 1
-
+    
     return False, 0
 
 def evaluate(state, weights):
@@ -133,6 +147,3 @@ def evaluate(state, weights):
 
 def get_metrics(state):
     pass
-
-# testando o minMax
-# print(minMax(getInitialState(), 10, float('-inf'), float('inf')))
