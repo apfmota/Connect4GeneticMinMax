@@ -151,7 +151,6 @@ def get_metrics(state):
         getSequences(3, state, 1), # numero de trincas abertas jogador 1
         getSequences(3, state, 2), # numero de trincas abertas jogador 2
     ]
-    pass
 
 def getSequences(sequenceSize, state, player):
     triples = 0
