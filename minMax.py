@@ -1,6 +1,8 @@
 # não sei se esse código realmente vai ser utilizado,
 # escrevi pra ver se eu entendi a lógica do minMax
 import copy
+import numpy as np
+import matplotlib.pyplot as plt
 
 class State:
     def __init__(self, board, currentPlayer, lastMove=None):
@@ -25,10 +27,37 @@ class State:
         newState.board[move[0]][move[1]] = self.currentPlayer
         newState.moveCount = self.moveCount + 1
         return newState
-    
-    def printBoard(self):
-        for line in self.board:
-            print(' '.join(map(str, line)))
+
+    def generateFrame(self, frame, terminal, winner):
+
+        fig, ax = plt.subplots()
+        ax.set_xticks(np.arange(-0.5, 5, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, 5, 1), minor=True)
+        ax.grid(which='minor', color='black', linestyle='-', linewidth=2)
+
+        for i in range(5):
+            for j in range(5):
+                if self.board[i][j] == 1:
+                    ax.text(j, 4 - i, 'O', ha='center', va='center', fontsize=20, color='blue')
+                elif self.board[i][j] == 2:
+                    ax.text(j, 4 - i, 'O', ha='center', va='center', fontsize=20, color='red')
+
+        ax.set_xlim(-0.5, 4.5)
+        ax.set_ylim(-0.5, 4.5)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        if terminal:
+            if winner == 1:
+                ax.text(2, -0.8, 'Player 1 wins!', ha='center', va='center', fontsize=20, color='blue')
+            elif winner == 2:
+                ax.text(2, -0.8, 'Player 2 wins!', ha='center', va='center', fontsize=20, color='red')
+            else:
+                ax.text(2, -0.8, 'Draw!', ha='center', va='center', fontsize=20, color='black')
+
+        filename = f"frame_{frame}.png"
+        plt.savefig(filename)
+        plt.close(fig)
 
 def getInitialState():
     return State([

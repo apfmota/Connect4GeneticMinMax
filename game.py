@@ -1,14 +1,18 @@
 import minMax
+import os
+import glob
+from PIL import Image
 
 class Game:
-    def __init__(self, player1, player2, depth, printResults=False):
+    def __init__(self, player1, player2, depth, generateGif=False):
         self.depth = depth
         self.player1 = player1
         self.player2 = player2
         self.state = minMax.getInitialState()
-        self.printResults = printResults
+        self.generateGif = generateGif
     
     def play(self):
+        frame = 0
         while True:
             if self.state.currentPlayer == 1:
                 move = self.findBestMove()
@@ -16,17 +20,16 @@ class Game:
                 move = self.findBestMove()
             
             self.state = self.state.makeMove(move)
-            if self.printResults:
-                print(f"Jogador {self.state.lastPlayer} jogou: {move}")
-                self.state.printBoard()
+
+            terminal, winner = minMax.isTerminal(self.state)    
+            if (self.generateGif):
+                self.state.generateFrame(frame, terminal, winner)
+            frame += 1
             
-            terminal, winner = minMax.isTerminal(self.state)
             if terminal:
-                if self.printResults:
-                    if winner == 0:
-                        print("Empate!")
-                    else:
-                        print(f"Jogador {winner} venceu!")
+                if self.generateGif:
+                    makeGif()
+                    cleanupFrames()
                 return winner
     
     def findBestMove(self):
@@ -49,6 +52,20 @@ class Game:
                     bestMove = possibleState.lastMove
             return bestMove
     
+def cleanupFrames():
+    for f in glob.glob("frame_*.png"):
+        os.remove(f)
 
-game = Game([1, -1, 1, -1], [1, -1, 1, -1], 4, printResults=True)
+def makeGif(output_filename="output.gif", duration=500):
+    frames = sorted(glob.glob("frame_*.png"), key=lambda x: int(x.split('_')[1].split('.')[0]))
+    images = [Image.open(f).convert('RGBA') for f in frames]
+
+    if images:
+        images[0].save(output_filename,
+                       save_all=True,
+                       append_images=images[1:],
+                       duration=duration,
+                       loop=0)
+
+game = Game([1, -1, 1, -1], [1, -1, 1, -1], 4, generateGif=True)
 print(game.play())
