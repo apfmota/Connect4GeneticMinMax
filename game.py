@@ -50,5 +50,5 @@ class Game:
             return bestMove
     
 
-game = Game([], [], 10, printResults=True)
+game = Game([1, -1, 1, -1], [1, -1, 1, -1], 4, printResults=True)
 print(game.play())

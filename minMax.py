@@ -50,8 +50,7 @@ def minMax(state: State, depth, alfa, beta, weights):
             else:
                 return 0
         else:
-            return 0
-            #return evaluate(state, weights)
+            return evaluate(state, weights)
         
     possibleStates = state.getNextStates()
 
@@ -146,4 +145,110 @@ def evaluate(state, weights):
     return eval
 
 def get_metrics(state):
+    return [
+        getSequences(2, state, 1), # numero de duplas abertas jogador 1
+        getSequences(2, state, 2), # numero de duplas abertas jogador 2
+        getSequences(3, state, 1), # numero de trincas abertas jogador 1
+        getSequences(3, state, 2), # numero de trincas abertas jogador 2
+    ]
     pass
+
+def getSequences(sequenceSize, state, player):
+    triples = 0
+    # horizontal
+    for i in range(5):
+        sequentialPieces = 0
+        for j in range(5):
+            if state.board[i][j] == player:
+                sequentialPieces += 1
+            else:
+                sequentialPieces = 0
+            # 3 em sequencia com um vazio antes ou depois
+            if sequentialPieces >= sequenceSize and ((j > sequenceSize -1 and  state.board[i][j - sequenceSize] == 0) or (j < 4 and state.board[i][j + 1] == 0)):
+                triples += 1
+    # vertical
+    for i in range(5):
+        sequentialPieces = 0
+        for j in range(5):
+            if state.board[j][i] == player:
+                sequentialPieces += 1
+            else:
+                sequentialPieces = 0
+            # 3 em sequencia com um vazio antes ou depois
+            if sequentialPieces >= sequenceSize and ((j > sequenceSize - 1 and state.board[j - sequenceSize][i] == 0) or (j < 4 and state.board[j + 1][i] == 0)):
+                triples += 1
+
+    # diagonal esquerda -> direita
+    for i in range(5):
+        sequentialPieces = 0
+        row, col = i, 0
+        while row < 5 and col < 5:
+            if state.board[row][col] == player:
+                sequentialPieces += 1
+            else:
+                sequentialPieces = 0
+            # 3 em sequencia com um vazio antes ou depois
+            if sequentialPieces >= sequenceSize and ((row > sequenceSize - 1 and col > sequenceSize - 1 and state.board[row - sequenceSize][col - sequenceSize] == 0) or (row < 4 and col < 4 and state.board[row + 1][col + 1] == 0)):
+                triples += 1
+            row += 1
+            col += 1
+
+    # diagonal topo -> direita
+    for i in range(1, 5):
+        sequentialPieces = 0
+        row, col = 0, i
+        while row < 5 and col < 5:
+            if state.board[row][col] == player:
+                sequentialPieces += 1
+            else:
+                sequentialPieces = 0
+            # 3 em sequencia com um vazio antes ou depois
+            if sequentialPieces >= sequenceSize and ((row > sequenceSize - 1 and col > sequenceSize - 1 and state.board[row - sequenceSize][col - sequenceSize] == 0) or (row < 4 and col < 4 and state.board[row + 1][col + 1] == 0)):
+                triples += 1
+            row += 1
+            col += 1
+
+    # diagonal direita -> esquerda
+    for i in range(5):
+        sequentialPieces = 0
+        row, col = i, 4
+        while row < 5 and col >= 0:
+            if state.board[row][col] == player:
+                sequentialPieces += 1
+            else:
+                sequentialPieces = 0
+            # 3 em sequencia com um vazio antes ou depois
+            if sequentialPieces >= sequenceSize and ((row > sequenceSize - 1 and col + sequenceSize < 5 and state.board[row - sequenceSize][col + sequenceSize] == 0) or (row < 4 and col > 0 and state.board[row + 1][col - 1] == 0)):
+                triples += 1
+            row += 1
+            col -= 1
+    
+    # diagonal topo -> esquerda
+    for i in range(4):
+        sequentialPieces = 0
+        row, col = 0, i
+        while row < 5 and col >= 0:
+            if state.board[row][col] == player:
+                sequentialPieces += 1
+            else:
+                sequentialPieces = 0
+            # 3 em sequencia com um vazio antes ou depois
+            if sequentialPieces >= sequenceSize and ((row > sequenceSize - 1 and col + sequenceSize < 5 and state.board[row - sequenceSize][col + sequenceSize] == 0) or (row < 4 and col > 0 and state.board[row + 1][col - 1] == 0)):
+                triples += 1
+            row += 1
+            col -= 1
+
+    return triples
+
+
+board = [
+    [0, 0, 0, 1, 0],
+    [2, 2, 1, 1, 0],
+    [2, 1, 1, 0, 0],
+    [2, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+]
+
+state = State(board, 1)
+
+print(getSequences(2, state, 2))
