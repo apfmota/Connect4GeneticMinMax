@@ -267,16 +267,3 @@ def getSequences(sequenceSize, state, player):
             col -= 1
 
     return triples
-
-
-board = [
-    [0, 0, 0, 1, 0],
-    [2, 2, 1, 1, 0],
-    [2, 1, 1, 0, 0],
-    [2, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-]
-
-state = State(board, 1)
-
-print(getSequences(2, state, 2))
