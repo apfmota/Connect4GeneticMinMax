@@ -67,5 +67,5 @@ def makeGif(output_filename="output.gif", duration=500):
                        duration=duration,
                        loop=0)
 
-game = Game([1, -1, 1, -1], [1, -1, 1, -1], 4, generateGif=True)
-print(game.play())
+# game = Game([1, -1, 1, -1], [1, -1, 1, -1], 4, generateGif=True)
+# print(game.play())
