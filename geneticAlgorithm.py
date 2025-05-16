@@ -3,15 +3,18 @@ import matplotlib.pyplot as plt
 import minMax
 import game
 
-POPULATION_SIZE = 10
+POPULATION_SIZE = 20
 GENE_COUNT = 4
 
-ELITISM = 4 # Quantos melhores elementos continuam na proxima geracao
-TOURNAMENT_SIZE = 6
+ELITISM = 2 # Quantos melhores elementos continuam na proxima geracao
+TOURNAMENT_SIZE = 4
 TOURNAMENTS_PER_GEN = 3
-MIN_MAX_DEPTH = 4
+MIN_MAX_DEPTH = 3
+RANDOMS_WITH_CROSSOVER = 10
+RANDOMS = 2
 
-TOTAL_GENERATIONS = 5
+
+TOTAL_GENERATIONS = 20
 
 MUTATION_RATE = 2 # 2% dos genes irão se alterar
 
@@ -153,6 +156,14 @@ def make_next_generation(population, judges):
     for i in range(TOURNAMENTS_PER_GEN):
         c1, c2 = tournament()
         new_population.extend(crossover(population[c1], population[c2]))
+
+    # Adiciona N individuso aleatorios fazendo crossover com os N melhores
+    for i in range(RANDOMS_WITH_CROSSOVER):
+        new_population.extend(crossover(create_random_chromosome(), population[-i]))
+
+    # Adiciona N individuos aleatorios
+    for i in range(RANDOMS):
+        new_population.append(create_random_chromosome())
 
     new_population.extend(population[-ELITISM:])
     return new_population
