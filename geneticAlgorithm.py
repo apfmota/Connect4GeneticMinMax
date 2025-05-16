@@ -1,19 +1,24 @@
 import random
-
+import matplotlib.pyplot as plt
 import minMax
 import game
 
 POPULATION_SIZE = 10
 GENE_COUNT = 4
 
-ELITISM = 4
+ELITISM = 4 # Quantos melhores elementos continuam na proxima geracao
 TOURNAMENT_SIZE = 6
 TOURNAMENTS_PER_GEN = 3
 MIN_MAX_DEPTH = 4
 
 TOTAL_GENERATIONS = 5
 
+MUTATION_RATE = 2 # 2% dos genes irão se alterar
+
 JUDGE_COUNT = 3
+
+avg_score = []
+best_score = []
 
 class Chromosome:
     def __init__(self, genes):
@@ -99,8 +104,12 @@ def fitness_population(population, judges):
         print(chromosome)
         score_sum += chromosome.score
 
-    sorted(population, key=lambda chr: chr.score)
-    print(f"\n - Average Score: {score_sum/POPULATION_SIZE}")
+    population = sorted(population, key=lambda chr: chr.score)
+    avg_score.append(score_sum / POPULATION_SIZE)
+    best_score.append(population[-1].score)
+
+    print(f"\n - Average Score: {score_sum / POPULATION_SIZE}")
+    print(f"\n - Highest Score: {population[-1].score}")
 
 def tournament():
     participants = []
@@ -111,13 +120,26 @@ def tournament():
         else:
             participants.append(aux)
 
-    sorted(participants)
+    participants = sorted(participants)
     return participants[-1], participants[-2]
+
+def mutation(chromosome):
+    for g in chromosome.genes:
+        if random.randint(1, 100) <= MUTATION_RATE:
+            op = random.randint(1, 2)
+            if op == 1:
+                g += 1
+            else:
+                g -= 1
+            g = min(max(g, -10), 10)
 
 def crossover(chromosome1, chromosome2):
     point = GENE_COUNT // 2
     child1 = Chromosome(chromosome1.genes[:point] + chromosome2.genes[point:GENE_COUNT])
     child2 = Chromosome(chromosome2.genes[:point] + chromosome1.genes[point:GENE_COUNT])
+
+    mutation(child1)
+    mutation(child2)
 
     return [child1, child2]
 
@@ -133,22 +155,30 @@ def make_next_generation(population, judges):
         new_population.extend(crossover(population[c1], population[c2]))
 
     new_population.extend(population[-ELITISM:])
-    population = new_population
+    return new_population
+
+
+def plot_chart(data, name, metric_name):
+    # Separa os pontos em listas de x e y
+    x = list(range(1, len(data) + 1))
+    y = data
+    
+    # Cria o gráfico
+    plt.figure(figsize=(6, 4))
+    plt.plot(x, y, marker='o', linestyle='-', color='blue')
+    plt.title(name)
+    plt.xlabel('Geração')
+    plt.ylabel(metric_name)
+    plt.grid(True)
+    plt.show()
 
 population = create_population()
 judges = create_judges()
 
 for i in range(TOTAL_GENERATIONS):
-    make_next_generation(population, judges)
+    print(f"---------\n{i + 1} Generation\n---------")
+    population = make_next_generation(population, judges)
 
-# score_sum = 0
-# for i, subject in enumerate(population):
-#     score = fitness(subject, judges)
-#     print(f"score of {i}: {score}")
-#     score_sum += score
-
-# score_sum /= POPULATION_SIZE
-# print(f"Average Score: {score_sum}")
-
-# print(match(population[0], judges[0]))
+plot_chart(avg_score, "Score Médio do fitness por geração", "Score")
+plot_chart(best_score, "Melhor score do fitness por geração", "Score")
 
