@@ -104,7 +104,7 @@ def fitness_population(population, judges):
         print(chromosome)
         score_sum += chromosome.score
 
-    population = sorted(population, key=lambda chr: chr.score)
+    population.sort(key=lambda chr: chr.score)
     avg_score.append(score_sum / POPULATION_SIZE)
     best_score.append(population[-1].score)
 
