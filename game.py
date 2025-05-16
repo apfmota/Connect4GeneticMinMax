@@ -12,7 +12,13 @@ class Game:
         self.generateGif = generateGif
     
     def play(self):
+        """
+            Retorna (vencedor, quantidade de jogadas)
+        """
+
         frame = 0
+        move_count = 0
+
         while True:
             if self.state.currentPlayer == 1:
                 move = self.findBestMove()
@@ -25,12 +31,13 @@ class Game:
             if (self.generateGif):
                 self.state.generateFrame(frame, terminal, winner)
             frame += 1
+            move_count += 1
             
             if terminal:
                 if self.generateGif:
                     makeGif()
                     cleanupFrames()
-                return winner
+                return winner, move_count
     
     def findBestMove(self):
         if self.state.currentPlayer == 1:
