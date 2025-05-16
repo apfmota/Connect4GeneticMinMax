@@ -5,13 +5,25 @@ import game
 
 POPULATION_SIZE = 10
 GENE_COUNT = 4
+
+ELITISM = 4
+TOURNAMENT_SIZE = 6
+TOURNAMENTS_PER_GEN = 3
 MIN_MAX_DEPTH = 4
+
+TOTAL_GENERATIONS = 5
 
 JUDGE_COUNT = 3
 
 class Chromosome:
     def __init__(self, genes):
         self.genes = genes
+        self.total_wins = 0
+        self.total_losses = 0
+        self.total_draws = 0
+        self.score = 0
+
+    def reset_metrics(self):
         self.total_wins = 0
         self.total_losses = 0
         self.total_draws = 0
@@ -81,24 +93,53 @@ def fitness(chromosome, judges):
         set_score(chromosome, winner, total_moves, 2)
 
 def fitness_population(population, judges):
+    score_sum = 0
     for chromosome in population:
         fitness(chromosome, judges)
         print(chromosome)
+        score_sum += chromosome.score
+
+    sorted(population, key=lambda chr: chr.score)
+    print(f"\n - Average Score: {score_sum/POPULATION_SIZE}")
 
 def tournament():
-    pass
+    participants = []
+    for i in range(TOURNAMENT_SIZE):
+        aux = random.randint(0, POPULATION_SIZE - 1)
+        if participants.__contains__(aux):
+            i -= 1
+        else:
+            participants.append(aux)
+
+    sorted(participants)
+    return participants[-1], participants[-2]
 
 def crossover(chromosome1, chromosome2):
     point = GENE_COUNT // 2
     child1 = Chromosome(chromosome1.genes[:point] + chromosome2.genes[point:GENE_COUNT])
     child2 = Chromosome(chromosome2.genes[:point] + chromosome1.genes[point:GENE_COUNT])
 
-    return child1, child2
+    return [child1, child2]
+
+def make_next_generation(population, judges):
+    fitness_population(population, judges)
+
+    for p in population:
+        p.reset_metrics()
+
+    new_population = []
+    for i in range(TOURNAMENTS_PER_GEN):
+        c1, c2 = tournament()
+        new_population.extend(crossover(population[c1], population[c2]))
+
+    new_population.extend(population[-ELITISM:])
+    population = new_population
 
 population = create_population()
 judges = create_judges()
 
-fitness_population(population, judges)
+for i in range(TOTAL_GENERATIONS):
+    make_next_generation(population, judges)
 
 # score_sum = 0
 # for i, subject in enumerate(population):
