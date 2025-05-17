@@ -101,9 +101,6 @@ def minMax(state: State, depth, alfa, beta, weights):
         return bestValue
         
 def isTerminal(state):
-    #tabuleiro cheio:
-    if state.moveCount == 25:
-        return True, 0
     #checa 4 na linha:
     if (state.lastMove == None):
         return False, 0
@@ -161,8 +158,8 @@ def isTerminal(state):
             sequentialPieces = 0
         startRow += 1
         startCol -= 1
-    
-    return False, 0
+
+    return state.moveCount == 25, 0
 
 def evaluate(state, weights):
     eval = 0

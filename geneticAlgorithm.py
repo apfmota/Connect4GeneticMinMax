@@ -13,8 +13,9 @@ MIN_MAX_DEPTH = 3
 RANDOMS_WITH_CROSSOVER = 10
 RANDOMS = 2
 
+DEFAULT_JUDGE = [0, 0, 1, 0]
 
-TOTAL_GENERATIONS = 20
+TOTAL_GENERATIONS = 10
 
 MUTATION_RATE = 2 # 2% dos genes irão se alterar
 
@@ -100,7 +101,7 @@ def fitness(chromosome, judges):
         winner, total_moves = match(judge, chromosome)
         set_score(chromosome, winner, total_moves, 2)
 
-def fitness_population(population, judges):
+def fitness_population(population, judges, populationNumber):
     score_sum = 0
     for chromosome in population:
         fitness(chromosome, judges)
@@ -110,6 +111,8 @@ def fitness_population(population, judges):
     population.sort(key=lambda chr: chr.score)
     avg_score.append(score_sum / POPULATION_SIZE)
     best_score.append(population[-1].score)
+
+    game.Game(population[-1].genes, DEFAULT_JUDGE, MIN_MAX_DEPTH, True, f"output_{populationNumber}.gif").play()
 
     print(f"\n - Average Score: {score_sum / POPULATION_SIZE}")
     print(f"\n - Highest Score: {population[-1].score}")
@@ -146,8 +149,8 @@ def crossover(chromosome1, chromosome2):
 
     return [child1, child2]
 
-def make_next_generation(population, judges):
-    fitness_population(population, judges)
+def make_next_generation(population, judges, populationNumber):
+    fitness_population(population, judges, populationNumber)
 
     for p in population:
         p.reset_metrics()
@@ -188,7 +191,7 @@ judges = create_judges()
 
 for i in range(TOTAL_GENERATIONS):
     print(f"---------\n{i + 1} Generation\n---------")
-    population = make_next_generation(population, judges)
+    population = make_next_generation(population, judges, i + 1)
 
 plot_chart(avg_score, "Score Médio do fitness por geração", "Score")
 plot_chart(best_score, "Melhor score do fitness por geração", "Score")

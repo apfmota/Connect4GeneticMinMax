@@ -4,12 +4,18 @@ import glob
 from PIL import Image
 
 class Game:
-    def __init__(self, player1, player2, depth, generateGif=False):
+    def __init__(self, player1, player2, depth, generateGif=False, gifName="output.gif"):
+        """
+            player1: genes do jogador 1
+            player2: genes do jogador 2
+            depth: profundidade da árvore de busca
+        """
         self.depth = depth
         self.player1 = player1
         self.player2 = player2
         self.state = minMax.getInitialState()
         self.generateGif = generateGif
+        self.gifName = gifName
     
     def play(self):
         """
@@ -35,7 +41,7 @@ class Game:
             
             if terminal:
                 if self.generateGif:
-                    makeGif()
+                    makeGif(output_filename=self.gifName)
                     cleanupFrames()
                 return winner, move_count
     
